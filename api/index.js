@@ -13,6 +13,10 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
+app.get('/test', (req, res) => {
+  res.send('Server is working');
+});
+
 const upload = multer({ storage: multer.memoryStorage() });
 
 let diagnosticMetrics = [];
