@@ -1,4 +1,4 @@
-// backend/index.js (hardened version for unit parsing)
+// backend/api/upload.js (Fixed and optimized)
 const express = require('express');
 const multer = require('multer');
 const hl7 = require('hl7');
@@ -8,40 +8,39 @@ const csv = require('csv-parser');
 const path = require('path');
 
 const app = express();
-const PORT = process.env.PORT || 5000;
 
 app.use(cors());
 app.use(express.json());
 
-const upload = multer({ dest: 'uploads/' });
+const upload = multer({ storage: multer.memoryStorage() });
 
 let diagnosticMetrics = [];
 
-function loadCSVData() {
+// Load CSV data
+async function loadCSVData() {
   return new Promise((resolve, reject) => {
     const results = [];
-    fs.createReadStream(path.join(__dirname, 'data/diagnostic_metrics.csv'))
+    fs.createReadStream(path.join(__dirname, '../data/diagnostic_metrics.csv'))
       .pipe(csv())
       .on('data', (data) => results.push(data))
       .on('end', () => {
         diagnosticMetrics = results;
         console.log('✅ diagnostic_metrics.csv loaded with', diagnosticMetrics.length, 'entries');
         resolve();
-      });
+      })
+      .on('error', (error) => reject(error));
   });
 }
 
+// HL7 Parsing logic
 function parseHL7Content(content) {
   const parsed = hl7.parseString(content);
   const results = [];
-  console.log('✅ HL7 content parsed, segments count:', parsed.length);
 
   parsed.forEach(segment => {
     const segmentName = Array.isArray(segment[0]) ? segment[0][0] : segment[0];
-    console.log('🔍 Processing segment:', segment); // Log each segment being processed
 
     if (segmentName?.trim() === 'OBX') {
-      console.log('🔍 OBX segment found:', segment); // Log OBX segment details
       const codeField = segment[3];
       const code = (Array.isArray(codeField) ? codeField[0] : codeField || '').toString().trim();
       const value = parseFloat(segment[5]);
@@ -59,15 +58,12 @@ function parseHL7Content(content) {
         } else {
           units = '';
         }
-      } catch (err) {
-        console.error('⚠️ Error parsing units:', raw, err);
+      } catch {
         units = '';
       }
 
       if (code && !isNaN(value) && units) {
         results.push({ code, value, units });
-      } else {
-        console.warn('⚠️ Incomplete OBX data:', { code, value, units });
       }
     }
   });
@@ -75,13 +71,13 @@ function parseHL7Content(content) {
   return results;
 }
 
+// Identify abnormal results
 function findAbnormalResults(parsedResults) {
   return parsedResults.map(result => {
     const matches = diagnosticMetrics.filter(metric => {
       const codes = metric.oru_sonic_codes.split(';').map(c => c.trim());
       const units = metric.oru_sonic_units.split(';').map(u => u.trim());
-      const match = codes.includes(result.code) && units.includes(result.units);
-      return match;
+      return codes.includes(result.code) && units.includes(result.units);
     });
 
     if (matches.length > 0) {
@@ -90,9 +86,12 @@ function findAbnormalResults(parsedResults) {
       return { ...result, isAbnormal, range: `${everlab_lower} - ${everlab_higher}` };
     }
 
-    return null; // Return null if no match is found
-  }).filter(result => result !== null); // Filter out null results
+    return null;
+  }).filter(result => result !== null);
 }
+
+// Ensure CSV is loaded once when API is initialized
+let csvLoaded = false;
 
 app.post('/upload', upload.single('file'), async (req, res) => {
   try {
@@ -100,24 +99,18 @@ app.post('/upload', upload.single('file'), async (req, res) => {
       return res.status(400).json({ error: 'No file uploaded' });
     }
 
-    const filePath = req.file.path;
-    console.log('📥 File uploaded:', req.file.originalname, '->', filePath);
-
-    if (!fs.existsSync(filePath)) {
-      console.error('❌ Uploaded file not found:', filePath);
-      return res.status(500).json({ error: 'Temporary file not found' });
+    if (!csvLoaded) {
+      await loadCSVData();
+      csvLoaded = true;
     }
 
-    const content = fs.readFileSync(filePath, 'utf8');
-    console.log('📄 File content:', content.slice(0, 200)); // Log first 200 characters of file content
+    const content = req.file.buffer.toString('utf8');
     const parsed = parseHL7Content(content);
-    console.log('🔍 Parsed HL7 results:', parsed); // Log parsed HL7 results
     const results = findAbnormalResults(parsed);
-    console.log('🔍 Abnormal results:', results); // Log abnormal results
 
-    res.json({ results });
+    res.status(200).json({ results });
   } catch (err) {
-    console.error('❌ Error during file processing:', err);
+    console.error('❌ Error during processing:', err);
     res.status(500).json({ error: 'Failed to parse ORU file' });
   }
 });
