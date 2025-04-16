@@ -13,16 +13,11 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-app.get('/test', (req, res) => {
-  res.send('Server is working');
-});
-
-const upload = multer({ storage: multer.memoryStorage() });
+const upload = multer({ dest: 'uploads/' });
 
 let diagnosticMetrics = [];
-let csvLoaded = false;
 
-async function loadCSVData() {
+function loadCSVData() {
   return new Promise((resolve, reject) => {
     const results = [];
     fs.createReadStream(path.join(__dirname, 'data/diagnostic_metrics.csv'))
@@ -43,10 +38,7 @@ function parseHL7Content(content) {
 
   parsed.forEach(segment => {
     const segmentName = Array.isArray(segment[0]) ? segment[0][0] : segment[0];
-    console.log('🔍 Processing segment:', segment);
-
     if (segmentName?.trim() === 'OBX') {
-      console.log('🔍 OBX segment found:', segment);
       const codeField = segment[3];
       const code = (Array.isArray(codeField) ? codeField[0] : codeField || '').toString().trim();
       const value = parseFloat(segment[5]);
@@ -69,11 +61,7 @@ function parseHL7Content(content) {
         units = '';
       }
 
-      if (code && !isNaN(value) && units) {
-        results.push({ code, value, units });
-      } else {
-        console.warn('⚠️ Incomplete OBX data:', { code, value, units });
-      }
+      results.push({ code, value, units });
     }
   });
 
@@ -81,6 +69,7 @@ function parseHL7Content(content) {
 }
 
 function findAbnormalResults(parsedResults) {
+
   return parsedResults.map(result => {
     const matches = diagnosticMetrics.filter(metric => {
       const codes = metric.oru_sonic_codes.split(';').map(c => c.trim());
@@ -95,8 +84,8 @@ function findAbnormalResults(parsedResults) {
       return { ...result, isAbnormal, range: `${everlab_lower} - ${everlab_higher}` };
     }
 
-    return null;
-  }).filter(result => result !== null);
+    return { ...result, isAbnormal: false, range: 'N/A' };
+  });
 }
 
 app.post('/upload', upload.single('file'), async (req, res) => {
@@ -105,12 +94,15 @@ app.post('/upload', upload.single('file'), async (req, res) => {
       return res.status(400).json({ error: 'No file uploaded' });
     }
 
-    if (!csvLoaded) {
-      await loadCSVData();
-      csvLoaded = true;
+    const filePath = req.file.path;
+    console.log('📥 File uploaded:', req.file.originalname, '->', filePath);
+
+    if (!fs.existsSync(filePath)) {
+      console.error('❌ Uploaded file not found:', filePath);
+      return res.status(500).json({ error: 'Temporary file not found' });
     }
 
-    const content = req.file.buffer.toString('utf8');
+    const content = fs.readFileSync(filePath, 'utf8');
     const parsed = parseHL7Content(content);
     const results = findAbnormalResults(parsed);
 
@@ -121,5 +113,7 @@ app.post('/upload', upload.single('file'), async (req, res) => {
   }
 });
 
-// Export the handler for Vercel
-module.exports = app;
+app.listen(PORT, async () => {
+  await loadCSVData();
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
+});

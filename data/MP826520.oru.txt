@@ -3,7 +3,7 @@ PID|1||394255555^^^NATA&2133&N||SMITH^JOHN^^^DR||19700101|M|||EXAMPLE STREET^^TE
 PV1|1|O||||||4466067B^SIMPSON^DIDI^^^DR|4466067B^SIMPSON^DIDI^^^DR|||||||||||
 ORC|RE||394255555-C-SE-IS^NATA^2133^N||CM|||||||4466067B^SIMPSON^DIDI^^^DR
 OBR|1||394255555-C-SE-IS^NATA^2133^N|C-SE-IS^SE-IRON STUDIES^2133||20230530|202306080950+1000||||||general health check +|202306080950+1000||4466067B^SIMPSON^DIDI^^^DR||||LN&394255555||202307192134+1000||CH|F||^^^20230530^^S||
-OBX|1|NM|14798-3^S Iron:^LN||8|umol/L^umol/L|5-30||||F|||202306101318
+OBX|1|NM|14798-3^S Iron:^LN||50|umol/L^umol/L|5-30||||F|||202306101318
 OBX|2|NM|3034-6^S Transferrin:^LN||2.3|g/L^g/L|2.0-3.2||||F|||202306101318
 OBX|3|NM|6796-7^Transferrin Saturation:^LN||14|%^%|10-45||||F|||202306101318
 OBX|4|NM|2276-4^S Ferritin:^LN||135|ng/mL^ng/mL|30-500||||F|||202306101318
@@ -198,10 +198,10 @@ PID|1||394255555^^^NATA&2133&N||SMITH^JOHN^^^DR||19700101|M|||EXAMPLE STREET^^TE
 PV1|1|O||||||4466067B^SIMPSON^DIDI^^^DR|4466067B^SIMPSON^DIDI^^^DR|||||||||||
 ORC|RE||394255555-S-SE- HEP C VIRTUAL^NATA^2133^N||CM|||||||4466067B^SIMPSON^DIDI^^^DR
 OBR|1||394255555-S-SE- HEP C VIRTUAL^NATA^2133^N|S-SE- HEP C VIRTUAL^SE- HEP C VIRTUAL^2133||20230530|202306080950+1000||||||general health check +|202306080950+1000||4466067B^SIMPSON^DIDI^^^DR||||LN&394255555||202307192134+1000||SR|F||^^^20230530^^S||
-OBX|1|NM|I150^SE- HEP C VIRTUAL^2133||1.5|mg/L^mg/L||||F|||202306101318
-OBX|2|FT|I150^SE- HEP C VIRTUAL^2133||Comment for SE- HEP C VIRTUAL\.br\No serological evidence of Hepatitis C infection.\.br\Consider repeat testing in 6-8 weeks if acute infection is suspected.\.br\ \.br\High dose biotin may affect the result(s) obtained by this method. If\.br\biotin interference needs to be excluded, please phone our Medical\.br\microbiologist on 92877700 for advice.\.br\||||||F|||202306101318
-OBX|3|FT|I150^SE- HEP C VIRTUAL^2133||||||||F|||202306101318
-OBX|4|FT|I150^SE- HEP C VIRTUAL^2133||Pathologists: Drs L Waring,C Perera,G Robertson||||||F|||202306101318
-OBX|5|FT|I150^SE- HEP C VIRTUAL^2133||Tests Completed:  HEPATITIS INFO,IS,FLS,CA,TSH,EUC,LFT,PHOS,GF,CRP,VITD,FOL,B12,MG,ACR, A1C,HEPB-NSI,HIV NSI,FBE,ESR,HEPC-NSI||||||F|||202306101318
-OBX|6|FT|I150^SE- HEP C VIRTUAL^2133||Tests Pending  : ||||||F|||202306101318
-OBX|7|FT|I150^SE- HEP C VIRTUAL^2133||Sample Pending : ||||||F|||202306101318
+OBX|1|ST|22327-1^Hepatitis C Antibodies (by Murex EIA):^LN||Negative|^|||||F|||202306082333
+OBX|2|FT|I150^SE- HEP C VIRTUAL^2133||Comment for SE- HEP C VIRTUAL\.br\No serological evidence of Hepatitis C infection.\.br\Consider repeat testing in 6-8 weeks if acute infection is suspected.\.br\ \.br\High dose biotin may affect the result(s) obtained by this method. If\.br\biotin interference needs to be excluded, please phone our Medical\.br\microbiologist on 92877700 for advice.\.br\||||||F|||202306082333
+OBX|3|FT|I150^SE- HEP C VIRTUAL^2133||||||||F|||202306082333
+OBX|4|FT|I150^SE- HEP C VIRTUAL^2133||Pathologists: Drs L Waring,C Perera,G Robertson||||||F|||202306082333
+OBX|5|FT|I150^SE- HEP C VIRTUAL^2133||Tests Completed:  HEPATITIS INFO,IS,FLS,CA,TSH,EUC,LFT,PHOS,GF,CRP,VITD,FOL,B12,MG,ACR, A1C,HEPB-NSI,HIV NSI,FBE,ESR,HEPC-NSI||||||F|||202306082333
+OBX|6|FT|I150^SE- HEP C VIRTUAL^2133||Tests Pending  : ||||||F|||202306082333
+OBX|7|FT|I150^SE- HEP C VIRTUAL^2133||Sample Pending : ||||||F|||202306082333
