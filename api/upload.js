@@ -20,6 +20,7 @@ app.get('/test', (req, res) => {
 const upload = multer({ storage: multer.memoryStorage() });
 
 let diagnosticMetrics = [];
+let csvLoaded = false;
 
 async function loadCSVData() {
   return new Promise((resolve, reject) => {
@@ -42,10 +43,10 @@ function parseHL7Content(content) {
 
   parsed.forEach(segment => {
     const segmentName = Array.isArray(segment[0]) ? segment[0][0] : segment[0];
-    console.log('🔍 Processing segment:', segment); // Log each segment being processed
+    console.log('🔍 Processing segment:', segment);
 
     if (segmentName?.trim() === 'OBX') {
-      console.log('🔍 OBX segment found:', segment); // Log OBX segment details
+      console.log('🔍 OBX segment found:', segment);
       const codeField = segment[3];
       const code = (Array.isArray(codeField) ? codeField[0] : codeField || '').toString().trim();
       const value = parseFloat(segment[5]);
@@ -94,12 +95,9 @@ function findAbnormalResults(parsedResults) {
       return { ...result, isAbnormal, range: `${everlab_lower} - ${everlab_higher}` };
     }
 
-    return null; // Return null if no match is found
-  }).filter(result => result !== null); // Filter out null results
+    return null;
+  }).filter(result => result !== null);
 }
-
-let csvLoaded = false;
-
 
 app.post('/upload', upload.single('file'), async (req, res) => {
   try {
@@ -110,14 +108,6 @@ app.post('/upload', upload.single('file'), async (req, res) => {
     if (!csvLoaded) {
       await loadCSVData();
       csvLoaded = true;
-    }
-
-    const filePath = req.file.path;
-    console.log('📥 File uploaded:', req.file.originalname, '->', filePath);
-
-    if (!fs.existsSync(filePath)) {
-      console.error('❌ Uploaded file not found:', filePath);
-      return res.status(500).json({ error: 'Temporary file not found' });
     }
 
     const content = req.file.buffer.toString('utf8');
@@ -131,4 +121,5 @@ app.post('/upload', upload.single('file'), async (req, res) => {
   }
 });
 
+// Export the handler for Vercel
 module.exports = app;
