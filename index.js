@@ -15,6 +15,10 @@ app.use(express.json());
 
 const upload = multer({ dest: 'uploads/' });
 
+app.get('/', (req, res) => {
+  res.send('Hello World');
+});
+
 let diagnosticMetrics = [];
 
 function loadCSVData() {
