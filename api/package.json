@@ -1,10 +1,10 @@
 {
   "name": "everlab-backend",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "upload.js",
   "type": "commonjs",
   "scripts": {
-    "dev": "nodemon index.js"
+    "dev": "nodemon upload.js"
   },
   "dependencies": {
     "cors": "^2.8.5",
